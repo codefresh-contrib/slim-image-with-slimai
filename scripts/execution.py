@@ -3,6 +3,7 @@ import os
 import requests
 import shutil
 import json
+import time
 
 # Global Variables
 templateExecutionPayloadJSONPath = "./templates/execution.payload.json"
@@ -100,25 +101,78 @@ def execute(requestJSONFile):
             print("Failed to upload JSON data: " + r['error'])
             exit(1)
     elif request.status_code != 200:
-        print("ERROR: API returned status code during execution: ", request.status_code)
+        print("ERROR: API returned status code during execution post: ", request.status_code)
     else:
         return r['id']
 
-def watch(executionID):
-    buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID + "/events"
+# Fetches logs for execution and then returns them, or throws an error if the status code != 200
+def getLogs(executionID):
+    buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID + "/log?offset=1374&limit=10000"
     request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
+    if request.status_code != 200:
+        print("ERROR: API returned status code during log fetch: ", request.status_code)
+    else:
+        return request.text
+
+def watch(executionID):
+    buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID
+    request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
+    response = request.text
     if request.status_code != 200:
         print("ERROR: API returned status code during watch: ", request.status_code)
     else:
-        print(request.text)
+        r = json.loads(response)
+        completionStatus = "completed"
+        failureState = "failed"
+        while r['state'] != completionStatus:
+                time.sleep(5)
+                request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
+                if request.status_code != 200:
+                    print("ERROR: API returned status code during watch: ", request.status_code)
+                else:
+                    response = request.text
+                    r = json.loads(response)
+                    print("ID: " + executionID)
+                    print("Status: " + r['state'])
+                    if r['state'] == failureState:
+                        result(executionID, True)
+                    else:
+                        print("-")
+                        print(getLogs(executionID))
+                        print("------------------")
+        result(executionID, True)
 
+def result(executionID, isFailedStatus):
+    print("========= RESULTS ==========")
+    if isFailedStatus:
+        buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID + "/events"
+    else:
+        buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID + "/result"
+    request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
+    response = request.text
+    if request.status_code != 200:
+        print("ERROR: API returned status code during result fetch: ", request.status_code)
+    else:
+        r = json.loads(response)
+        successStatus = "ready"
+        if isFailedStatus:
+            print("ERROR: Execution has failed.")
+            print("Please see events below for details")
+            print("---------- EVENTS ----------")
+            print(response)
+            exit(1)
+        else:
+            print("Image hardened successfully. (" + namespace + "/" + repo + tag + "-slim)")
+            exit()
+    exit()
 
 
 if __name__ == "__main__":
     doTmpDir("create")
     createFlags()
     getRequestJSONFile = generateRequest()
-    #getExecutionID = execute(getRequestJSONFile)
-    getExecutionID = ""
+    getExecutionID = execute(getRequestJSONFile)
+    #getExecutionID = "rknx.2Ny4ii2XQcvFqj3OxjPSaI7eA35"
     watch(getExecutionID)
-    #doTmpDir("delete")
+    result(getExecutionID)
+    doTmpDir("delete")

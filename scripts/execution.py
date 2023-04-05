@@ -40,6 +40,7 @@ replaceList = [
             
             ]
 
+# Perform actions for the tmpDir (i.e create, delete)
 def doTmpDir(action):
     if action == "create":
         shutil.rmtree(tmpDir, ignore_errors=True)
@@ -50,6 +51,7 @@ def doTmpDir(action):
         print("ERROR: Invalid action for doTmpDir()")
         exit(1)
 
+# Creates the flag schemas for the JSON payload in generateRequest()
 def createFlags():
     pathsListNew = ""
     createPathSchema = ""
@@ -66,6 +68,7 @@ def createFlags():
         pathsListNew = pathsListNew + createPathSchema
     return pathsListNew, httpProbeFlag + ","
 
+# Generates a JSON payload for the execution request in execute()
 def generateRequest():
     with open(templateExecutionPayloadJSONPath, 'r') as file:
         loadTemplateExecPayload = file.read()
@@ -90,6 +93,7 @@ def generateRequest():
         loadTemplateExecPayload = jsonFile.read()
     return loadTemplateExecPayload
 
+# Sends an execution request to Slim.AI to slim an image
 def execute(requestJSONFile):
     print("Executing image hardening for: " + namespace + "/" + repo + ":" + tag)
     executionURL = baseURL + "/orgs/" + orgID + "/engine/executions"
@@ -115,6 +119,7 @@ def getLogs(executionID):
     else:
         return request.text
 
+# Watches for changes in the execution status
 def watch(executionID):
     buildURL = baseURL + "/orgs/" + orgID + "/engine/executions/" + executionID
     request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
@@ -125,6 +130,7 @@ def watch(executionID):
         r = json.loads(response)
         completionStatus = "completed"
         failureState = "failed"
+        # Watches for statuses mentioned above, when met, result(<execution-id>,isFailedStatus)
         while r['state'] != completionStatus:
                 time.sleep(5)
                 request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
@@ -143,6 +149,8 @@ def watch(executionID):
                         print("------------------")
         result(executionID, False)
 
+
+# Displays execution results once the execution has finished (either failed or completed)
 def result(executionID, isFailedStatus):
     print("========= RESULTS ==========")
     if isFailedStatus:
@@ -168,10 +176,13 @@ def result(executionID, isFailedStatus):
 
 
 if __name__ == "__main__":
+    # Create tmpDir
     doTmpDir("create")
+    # Create flags schemas for JSON payload
     createFlags()
+    # Generates JSON payload for execution
     getRequestJSONFile = generateRequest()
+    # Sends an execution to Slim.AI then returns execution ID to watch()
     getExecutionID = execute(getRequestJSONFile)
-    #getExecutionID = "rknx.2Ny4ii2XQcvFqj3OxjPSaI7eA35"
+    # Watches for changes on execution ID, sends results to result()
     watch(getExecutionID)
-    result(getExecutionID)

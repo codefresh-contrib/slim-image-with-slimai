@@ -5,14 +5,15 @@
 1. ✅ Construct JSON payload (`createFlags()` / `generateRequest()`)
     * Template is in `./templates/execution.payload.json`
 1. ✅ Send payload to Slim.AI (`execute()`)
-1. ➖ Watch for payload changes (`watch()`)
+1. ✅ Watch for payload changes (`watch()`)
     * Currently, it's set to skip `execute()` and a static variable is to be set (`getExecutionID`) in `main()` simply for the fact that I didn't want to send off hundreds of build requests. With this, it's simply querying the API for the data and returning it.
     * Problem: For some reason the build is failing, so I need to investigate why. I'm thinking it has to do with the payload that is being sent.
     * TODO:
-        1. Get build status
-        2. Get events
-        3. Get build logs
-1. ❌ Cleanup `./tmp` (`doTmpDir("delete)`)
+        1. ✅ Get build status
+        2. ✅ Get events
+        3. ✅ Get build logs
+1. ✅ Cleanup `./tmp` (`doTmpDir("delete)`)
+1. ➖ Debug why executions are failing
 1. ❌ Verify file was pushed to image registry successfully
 1. ❌ Package container image + build container image
 

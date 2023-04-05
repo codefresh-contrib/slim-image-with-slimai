@@ -45,7 +45,7 @@ While it can be easily updated, the image currently only supports using a single
 #### Codefresh platform
 If you are using this image on the Codefresh platform, there is no manual intervention needed as the image digest is provided through a varaible. For details: <https://codefresh.io/docs/docs/pipelines/variables/#step-member-variables>
 
-### Outside Codefresh platform
+#### Outside Codefresh platform
 Currently, there is no way for the image to know the image digest of the target image. Therefore, it must manually be provided using the `-d | --digest` flag. That being said, you can easily collect the target image digest by running: `docker image inspect <namespace>/<repo>:<tag> | jq .[].RepoDigests -c | cut -d : -f 2 | cut -d '"' -f 1` (This assumes the image is already pulled to the local machine)
 ### Slim.AI Organization ID
 

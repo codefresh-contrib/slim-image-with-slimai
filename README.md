@@ -1,4 +1,14 @@
+# Quick Start
 
+A very simple script (`./run.sh`) is available for quickly testing this image. Simply modify the variables under "Image details" and "Slim details" and execute the script.
+
+# Docker image location
+
+You can currently use this image as `mstantoncf/slim-saas-build` or build your own:
+
+```bash
+docker build -t $imageName -f Dockerfile .
+```
 # Progress
 
 1. ✅ Process arguments (entrypoint)
@@ -15,11 +25,6 @@
 1. ✅ Debug why executions are failing
 1. ✅ Verify file was pushed to image registry successfully
 1. ✅ Package container image + build container image
-
-# Quick Start
-
-A very simple script (`./run.sh`) is available for quickly testing this image. Simply modify the variables under "Image details" and "Slim details" and execute the script.
-
 # Development
 
 ## Usage

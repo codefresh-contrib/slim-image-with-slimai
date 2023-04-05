@@ -12,10 +12,13 @@
         2. ✅ Get events (Only reports when `results(<execution-id>, true)` as the events don't really give you much unless there is a failure)
         3. ✅ Get build logs (`getLogs()`)
 1. ✅ Cleanup `./tmp` (`doTmpDir("delete)`)
-1. ➖ Debug why executions are failing
-1. ❌ Verify file was pushed to image registry successfully
-1. ❌ Package container image + build container image
+1. ✅ Debug why executions are failing
+1. ✅ Verify file was pushed to image registry successfully
+1. ✅ Package container image + build container image
 
+# Quick Start
+
+A very simple script (`./run.sh`) is available for quickly testing this image. Simply modify the variables under "Image details" and "Slim details" and execute the script.
 
 # Development
 
@@ -37,12 +40,20 @@ Flags:
   -p | --paths            |   (Optional) Paths on filesystem to slim in comma separated list (I.e /usr,/bin,/etc
 ```
 
-# Example execution (dev)
+## Example execution
 
 ```bash
-./scripts/entrypoint.sh -o <organization-id> \
+# Build image
+docker build -t slim-saas-build -f Dockerfile .
+# Run slim-saas-build
+docker run --rm slim-saas-build -o <organization-id> \
  -a <api-token> \
 -c <connector-id> \
 -n codefresh -r cli -t latest \
 -d e64398f0928281d8154c9d5db155eaf854a968730a6d20a2e72ad9ffc12760f3
 ```
+## Notes
+
+If you would like to use `entrypoint.sh` locally, make sure to use `entrypoint-dev.sh` as this contains the correct paths. `entrypoint.sh` is set up for usage inside the container image.
+
+

@@ -90,6 +90,6 @@ done
 ## Check requirements are met
 requirements
 # Handoff
-executionScript="python /usr/bin/execution.py"
+executionScript="python ./scripts/execution.py"
 $executionScript $apiToken $organizationID $connectorID $digest $namespace $repo $tag $arch $os $paths
 exit 0

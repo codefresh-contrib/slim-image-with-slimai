@@ -32,8 +32,8 @@ replaceList = [
             'REPLACE.IMAGE.TAG',                                        # 4
             'REPLACE.IMAGE.ARCH',                                       # 5
             'REPLACE.IMAGE.OS',                                         # 6
-            '{"REPLACE.ADDITIONAL.FLAGS":"REPLACE.ADDITIONAL.FLAGS"}',  # 7
-            '{"REPLACE.HTTP.PROBE.FLAG":"REPLACE.HTTP.PROBE.FLAG"},',   # 8
+            '{ "REPLACE.ADDITIONAL.FLAGS": "REPLACE.ADDITIONAL.FLAGS" }',  # 7
+            '{ "REPLACE.HTTP.PROBE.FLAG": "REPLACE.HTTP.PROBE.FLAG" },',   # 8
             'REPLACE.NAMESPACE.SLIM',                                   # 9
             'REPLACE.REPO.SLIM',                                        # 10
             'REPLACE.TAG.SLIM'                                          # 11
@@ -103,6 +103,7 @@ def execute(requestJSONFile):
     elif request.status_code != 200:
         print("ERROR: API returned status code during execution post: ", request.status_code)
     else:
+        doTmpDir("delete")
         return r['id']
 
 # Fetches logs for execution and then returns them, or throws an error if the status code != 200
@@ -140,7 +141,7 @@ def watch(executionID):
                         print("-")
                         print(getLogs(executionID))
                         print("------------------")
-        result(executionID, True)
+        result(executionID, False)
 
 def result(executionID, isFailedStatus):
     print("========= RESULTS ==========")
@@ -154,7 +155,6 @@ def result(executionID, isFailedStatus):
         print("ERROR: API returned status code during result fetch: ", request.status_code)
     else:
         r = json.loads(response)
-        successStatus = "ready"
         if isFailedStatus:
             print("ERROR: Execution has failed.")
             print("Please see events below for details")
@@ -175,4 +175,3 @@ if __name__ == "__main__":
     #getExecutionID = "rknx.2Ny4ii2XQcvFqj3OxjPSaI7eA35"
     watch(getExecutionID)
     result(getExecutionID)
-    doTmpDir("delete")

@@ -1,3 +1,22 @@
+# codefresh-contrib/slim-image-with-slimai
+
+This repo is the source for the [Slim.AI SaaS Build for Codefresh image](#docker-image-location). This README covers information such as how to use the image, current limitations, and development work on the image.
+
+# Table of Contents
+
+- [Quick Start](#quick-start)
+- [Docker image location](#docker-image-location)
+- [Limitations](#limitations)
+    - [Single image namespace/repo:tag](#single-image-namespacerepotag)
+    - [Single connector ID](#single-connector-id)
+    - [Image digest requires manually grabbing](#image-digest-requires-manually-grabbing)
+         - [Codefresh platform](#codefresh-platform)
+         - [Outside Codefresh platform](#outside-codefresh-platform)
+    - [Slim.AI Organization ID](#slimai-organization-id)
+    - [Image must be pushed to your target's connector](#image-must-be-pushed-to-your-targets-connector)
+- [Development](#development)
+
+
 # Quick Start
 
 A very simple script (`./run.sh`) is available for quickly testing this image. Simply modify the variables under "Image details" and "Slim details" and execute the script.
@@ -9,22 +28,43 @@ You can currently use this image as `mstantoncf/slim-saas-build` or build your o
 ```bash
 docker build -t $imageName -f Dockerfile .
 ```
-# Progress
 
-1. ✅ Process arguments (entrypoint)
-1. ✅ Construct JSON payload (`createFlags()` / `generateRequest()`)
-    * Template is in `./templates/execution.payload.json`
-1. ✅ Send payload to Slim.AI (`execute()`)
-1. ✅ Watch for payload changes (`watch()`)
-    * Problem: For some reason the build is failing, so I need to investigate why. I'm thinking it has to do with the payload that is being sent.
-    * TODO:
-        1. ✅ Get build status (`watch()`)
-        2. ✅ Get events (Only reports when `results(<execution-id>, true)` as the events don't really give you much unless there is a failure)
-        3. ✅ Get build logs (`getLogs()`)
-1. ✅ Cleanup `./tmp` (`doTmpDir("delete)`)
-1. ✅ Debug why executions are failing
-1. ✅ Verify file was pushed to image registry successfully
-1. ✅ Package container image + build container image
+# Limitations
+
+Currently, the below categories are limitations of this image
+
+### Single image namespace/repo:tag
+
+While the image can *technically* be slightly modified to use a target/destination namespace/repo:tag, the image is only configured to use the same namespace/repo:tag combination for both target/desination. The only difference is that the destination appends `-slim`.
+### Single connector ID
+
+While it can be easily updated, the image currently only supports using a single connector ID. Which means that you'll need to make sure that the connector has access to the target and destination namespace/repo.
+
+### Image digest requires manually grabbing
+
+#### Codefresh platform
+If you are using this image on the Codefresh platform, there is no manual intervention needed as the image digest is provided through a varaible. For details: <https://codefresh.io/docs/docs/pipelines/variables/#step-member-variables>
+
+### Outside Codefresh platform
+Currently, there is no way for the image to know the image digest of the target image. Therefore, it must manually be provided using the `-d | --digest` flag. That being said, you can easily collect the target image digest by running: `docker image inspect <namespace>/<repo>:<tag> | jq .[].RepoDigests -c | cut -d : -f 2 | cut -d '"' -f 1` (This assumes the image is already pulled to the local machine)
+### Slim.AI Organization ID
+
+This isn't neccisarly a limitation of the image as much as it is of Slim.AI as there isn't an easy way to fetch the Organization ID. The easiest way to get this detail (from what we've found) is to:
+
+1. Navigate to https://portal.slim.dev/home (Make sure to login)
+1. Open your browser's "Dev Tools" and go to the "Network" tab
+1. Refresh the page
+1. Search for one of the following requests: `all`, `collections`, `namespaces`
+1. While inside the "Headers" tab for one of the above requests, you should see the a "Request URL" pattern similar to: `https://portal.slim.dev/bff/orgs/rko.XXXXXXXXXXXXXXXXXXXXXXXXXXX/<Request-Name>` where:
+   * `<Request-Name>` - The name of the request collected form the step above
+   * `rko.XXXXXXXXXXXXXXXXXXXXXXXXXXX` - Your Organization ID
+
+Hopefully there will be an easier way to collect the Organization ID in a future release (or there already is) but this is what we found to be the easiest and simplest way to collect this information.
+
+### Image must be pushed to your target's connector
+
+This isn't fully a limitation as it's more or so expected behavior as since this is using the Slim.AI (SaaS) platform, it's expected that the image is available via the target's connector. This means that you must push your image to the registry first, and then run this image. Otherwise, the image will throw an error as the target image does not exist.
+
 # Development
 
 ## Usage

@@ -43,7 +43,6 @@ steps:
     stage: "slim"
     type: "freestyle" # Run any command
     image: "mstantoncf/slim-saas-build:latest" # The image in which command will be executed
-    working_directory: "${{clone}}" # Running command where code cloned
     cmd:
       - "-o"
       - ${{slimOrganizationID}}

@@ -70,8 +70,12 @@ def createFlags():
 
 # Generates a JSON payload for the execution request in execute()
 def generateRequest():
-    with open(templateExecutionPayloadJSONPath, 'r') as file:
-        loadTemplateExecPayload = file.read()
+    try:
+        with open(templateExecutionPayloadJSONPath, 'r') as file:
+            loadTemplateExecPayload = file.read()
+    except:
+        print("ERROR: Couldn't open Template file for request generation")
+        exit(1)
     additionalFlagsSchemas, httpProbeSchema = createFlags()
     loadTemplateExecPayload = loadTemplateExecPayload.replace(replaceList[0], connectorID)
     loadTemplateExecPayload = loadTemplateExecPayload.replace(replaceList[1], digest)
@@ -89,8 +93,12 @@ def generateRequest():
     requestJSONFile = open(tmpJSONFilePath, "w")
     requestJSONFile.write(loadTemplateExecPayload)
     requestJSONFile.close()
-    with open(tmpJSONFilePath, 'r') as jsonFile:
-        loadTemplateExecPayload = jsonFile.read()
+    try:
+        with open(tmpJSONFilePath, 'r') as jsonFile:
+            loadTemplateExecPayload = jsonFile.read()
+    except:
+        print("ERROR: Couldn't open Template file for request generation")
+        exit(1)
     return loadTemplateExecPayload
 
 # Sends an execution request to Slim.AI to slim an image
@@ -106,6 +114,7 @@ def execute(requestJSONFile):
             exit(1)
     elif request.status_code != 200:
         print("ERROR: API returned status code during execution post: ", request.status_code)
+        exit(1)
     else:
         doTmpDir("delete")
         return r['id']
@@ -116,6 +125,7 @@ def getLogs(executionID):
     request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
     if request.status_code != 200:
         print("ERROR: API returned status code during log fetch: ", request.status_code)
+        exit(1)
     else:
         return request.text
 
@@ -126,6 +136,7 @@ def watch(executionID):
     response = request.text
     if request.status_code != 200:
         print("ERROR: API returned status code during watch: ", request.status_code)
+        exit(1)
     else:
         r = json.loads(response)
         completionStatus = "completed"
@@ -136,6 +147,7 @@ def watch(executionID):
                 request = requests.get(buildURL, auth = ("", apiToken), headers = {"accept": "application/json", "Content-Type": "application/json"})
                 if request.status_code != 200:
                     print("ERROR: API returned status code during watch: ", request.status_code)
+                    exit(1)
                 else:
                     response = request.text
                     r = json.loads(response)
@@ -161,6 +173,7 @@ def result(executionID, isFailedStatus):
     response = request.text
     if request.status_code != 200:
         print("ERROR: API returned status code during result fetch: ", request.status_code)
+        exit(1)
     else:
         r = json.loads(response)
         if isFailedStatus:
@@ -170,7 +183,7 @@ def result(executionID, isFailedStatus):
             print(response)
             exit(1)
         else:
-            print("Image hardened successfully. (" + namespace + "/" + repo + tag + "-slim)")
+            print("Image hardened successfully. (" + namespace + "/" + repo + ":" + tag + "-slim)")
             exit()
     exit()
 

@@ -27,7 +27,7 @@ steps:
     # Set 'latest' tag on the image. Or, use built-in variables
     # like ${{CF_BRANCH_TAG_NORMALIZED}} to use the current branch name/tag.
     tag: "${{imageTag}}"
-    dockerfile: "Dockerfile"
+    dockerfile: "${{imageRepo}}/${{imageRepo}}.Dockerfile"
 
 
   push:

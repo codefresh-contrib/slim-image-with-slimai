@@ -1,8 +1,5 @@
-# More examples of Codefresh YAML can be found at
-# https://codefresh.io/docs/docs/yaml-examples/examples/
-
 version: "1.0"
-# Stages can help you organize your steps in stages
+
 stages:
   - "clone"
   - "build"
@@ -10,6 +7,8 @@ stages:
   - "slim"
 
 steps:
+
+  # Cloning the repo which contains the docker file of the "bulky" (AKA Target) image
   clone:
     title: "Cloning repository"
     type: "git-clone"
@@ -18,6 +17,7 @@ steps:
     git: '${{gitProvider}}'
     stage: "clone"
 
+  # This is going to be the target image which will be slimmed
   build:
     title: "Building Docker image"
     stage: "build"
@@ -27,7 +27,7 @@ steps:
     tag: "${{imageTag}}"
     dockerfile: "${{imageRepo}}/${{imageRepo}}.Dockerfile"
 
-
+  # This is required to use the Slim.AI platform (See: https://github.com/codefresh-contrib/slim-image-with-slimai#image-must-be-pushed-to-your-targets-connector)
   push:
     title: "Pushing Docker image"
     stage: "push"
@@ -38,25 +38,28 @@ steps:
       image_name: ${{imageNamespace}}/${{imageRepo}}
       registry: ${{codefreshDockerRegistry}}
 
+  # Step which slims the target image and makes it available at: <namespace>/<repo>:<tag>-slim
   slim:
     title: "Slim Docker Image"
     stage: "slim"
-    type: "freestyle" # Run any command
-    image: "mstantoncf/slim-saas-build:latest" # The image in which command will be executed
+    type: "freestyle"
+    image: "mstantoncf/slim-saas-build:latest"
     cmd:
-      - "-o"
+    # These flags are the minimum required flags for the image to run  
+    # There are optional flags which can be set as well.
+    # For all flags which are available, see: https://github.com/codefresh-contrib/slim-image-with-slimai#usage
+
+      - "-o" # Slim organization ID (See: https://github.com/codefresh-contrib/slim-image-with-slimai#slimai-organization-id)
       - ${{slimOrganizationID}}
-      - "-a"
+      - "-a" # Slim API Token
       - ${{slimAPIToken}}
-      - "-c"
+      - "-c" # Slim Connector ID
       - ${{slimConnectorID}}
-      - "-n"
+      - "-n" # Namespace of slim image target (I.e <namespace>/<repo>:<tag>)
       - ${{imageNamespace}}
-      - "-r"
+      - "-r" # Repo of slim image target (I.e <namespace>/<repo>:<tag>)
       - ${{imageRepo}}
-      - "-t"
+      - "-t" # Tag of slim image target (I.e <namespace>/<repo>:<tag>)
       - ${{imageTag}}
-      - "-d"
+      - "-d" # This value is retreived automatically through the 'push' step (See: https://codefresh.io/docs/docs/pipelines/variables/#step-variables)
       - ${{steps.push.imageRepoDigest}}
-
-

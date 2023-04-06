@@ -5,9 +5,19 @@ import shutil
 import json
 import time
 
+###########
+
+# Required before Global Vars
+def getENV():
+    envVar = os.getenv("setENV")
+    if envVar == ".docker":
+        return "/app"
+    else:
+        return "."
+
 # Global Variables
-templateExecutionPayloadJSONPath = "./templates/execution.payload.json"
-tmpDir = "./tmp"
+templateExecutionPayloadJSONPath = getENV() + "/templates/execution.payload.json"
+tmpDir = getENV() + "/tmp"
 baseURL = "https://platform.slim.dev"
 
 
@@ -185,8 +195,6 @@ def result(executionID, isFailedStatus):
         else:
             print("Image hardened successfully. (" + namespace + "/" + repo + ":" + tag + "-slim)")
             exit()
-    exit()
-
 
 if __name__ == "__main__":
     # Create tmpDir

@@ -14,4 +14,6 @@ rm -rf requirements.txt
 
 WORKDIR /app
 
+ENV setENV=".docker"
+
 ENTRYPOINT [ "bash", "/usr/bin/entrypoint.sh" ]

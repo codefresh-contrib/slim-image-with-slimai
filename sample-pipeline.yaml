@@ -42,6 +42,7 @@ steps:
     title: "Slim Docker Image"
     stage: "slim"
     type: "freestyle" # Run any command
+    working_directory: "/app" # Required as the templates live here
     image: "mstantoncf/slim-saas-build:latest" # The image in which command will be executed
     cmd:
       - "-o"

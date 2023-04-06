@@ -2,12 +2,16 @@
 
 This repo is the source for the [Slim.AI SaaS Build for Codefresh image](#docker-image-location). This README covers information such as how to use the image, current limitations, and development work on the image.
 
+This image does not require mounting any volumes or special directories as all the building is done on the Slim.AI SaaS platform.
+
 # Table of Contents
 
 - [Quick Start](#quick-start)
   - [With Codefresh]()
   - [Standalone](#standalone)
 - [Docker image location](#docker-image-location)
+- [Usage](#usage)
+   - [Example Execuation](#example-execution)
 - [Limitations](#limitations)
     - [Single image namespace/repo:tag](#single-image-namespacerepotag)
     - [Single connector ID](#single-connector-id)
@@ -17,7 +21,6 @@ This repo is the source for the [Slim.AI SaaS Build for Codefresh image](#docker
     - [Slim.AI Organization ID](#slimai-organization-id)
     - [Image must be pushed to your target's connector](#image-must-be-pushed-to-your-targets-connector)
 - [Development](#development)
-
 
 # Quick Start
 
@@ -36,6 +39,38 @@ You can currently use this image as `mstantoncf/slim-saas-build` or build your o
 ```bash
 docker build -t $imageName -f Dockerfile .
 ```
+
+# Usage
+
+```bash
+Usage: slim-saas-build [flags...]
+
+Flags:
+  -a | --api-token        |   API token to access slim.ai (https://portal.slim.dev/settings)
+  -o | --organization-id  |   Organization ID in slim.ai
+  -c | --connector-id     |   Connector ID of slim.ai Registry
+  -d | --digest           |   Digest for the Docker image (docker image inspect <namespace>/<repo>:<tag> | jq .[].RepoDigests -c | cut -d : -f 2 | cut -d '"' -f 1)
+  -n | --namespace        |   Namespace for Docker image (I.e <namespace>/<repo>:<tag>)
+  -r | --repo             |   Repo for Docker image (I.e <namespace>/<repo>:<tag>)
+  -t | --tag              |   Tag for Docker image (I.e <namespace>/<repo>:<tag>)
+  -m | --arch             |   (Optional) Image Architecture (Default: amd64)
+  -s | --operating-system |   (Optional) Image Operating System (Default: linux)
+  -p | --paths            |   (Optional) Paths on filesystem to slim in comma separated list (I.e /usr,/bin,/etc
+```
+
+## Example execution
+
+```bash
+# Build image
+docker build -t slim-saas-build -f Dockerfile .
+# Run slim-saas-build
+docker run --rm slim-saas-build -o <organization-id> \
+ -a <api-token> \
+-c <connector-id> \
+-n codefresh -r cli -t latest \
+-d e64398f0928281d8154c9d5db155eaf854a968730a6d20a2e72ad9ffc12760f3
+```
+
 
 # Limitations
 
@@ -74,38 +109,6 @@ Hopefully there will be an easier way to collect the Organization ID in a future
 This isn't fully a limitation as it's more or so expected behavior as since this is using the Slim.AI (SaaS) platform, it's expected that the image is available via the target's connector. This means that you must push your image to the registry first, and then run this image. Otherwise, the image will throw an error as the target image does not exist.
 
 # Development
-
-## Usage
-
-```bash
-Usage: slim-saas-build [flags...]
-
-Flags:
-  -a | --api-token        |   API token to access slim.ai (https://portal.slim.dev/settings)
-  -o | --organization-id  |   Organization ID in slim.ai
-  -c | --connector-id     |   Connector ID of slim.ai Registry
-  -d | --digest           |   Digest for the Docker image (docker image inspect <namespace>/<repo>:<tag> | jq .[].RepoDigests -c | cut -d : -f 2 | cut -d '"' -f 1)
-  -n | --namespace        |   Namespace for Docker image (I.e <namespace>/<repo>:<tag>)
-  -r | --repo             |   Repo for Docker image (I.e <namespace>/<repo>:<tag>)
-  -t | --tag              |   Tag for Docker image (I.e <namespace>/<repo>:<tag>)
-  -m | --arch             |   (Optional) Image Architecture (Default: amd64)
-  -s | --operating-system |   (Optional) Image Operating System (Default: linux)
-  -p | --paths            |   (Optional) Paths on filesystem to slim in comma separated list (I.e /usr,/bin,/etc
-```
-
-## Example execution
-
-```bash
-# Build image
-docker build -t slim-saas-build -f Dockerfile .
-# Run slim-saas-build
-docker run --rm slim-saas-build -o <organization-id> \
- -a <api-token> \
--c <connector-id> \
--n codefresh -r cli -t latest \
--d e64398f0928281d8154c9d5db155eaf854a968730a6d20a2e72ad9ffc12760f3
-```
-## Notes
 
 If you would like to use `entrypoint.sh` locally, make sure to use `entrypoint-dev.sh` as this contains the correct paths. `entrypoint.sh` is set up for usage inside the container image.
 

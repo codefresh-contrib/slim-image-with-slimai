@@ -5,6 +5,8 @@ This repo is the source for the [Slim.AI SaaS Build for Codefresh image](#docker
 # Table of Contents
 
 - [Quick Start](#quick-start)
+  - [With Codefresh]()
+  - [Standalone](#standalone)
 - [Docker image location](#docker-image-location)
 - [Limitations](#limitations)
     - [Single image namespace/repo:tag](#single-image-namespacerepotag)
@@ -18,6 +20,12 @@ This repo is the source for the [Slim.AI SaaS Build for Codefresh image](#docker
 
 
 # Quick Start
+
+## With Codefresh
+
+You can find an example pipeline of how to use this image with Codefresh in [sample-pipeline.yaml](sample-pipeline.yaml).
+
+## Standalone
 
 A very simple script (`./run.sh`) is available for quickly testing this image. Simply modify the variables under "Image details" and "Slim details" and execute the script.
 

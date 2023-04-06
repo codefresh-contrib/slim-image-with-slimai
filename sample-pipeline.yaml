@@ -1,0 +1,64 @@
+# More examples of Codefresh YAML can be found at
+# https://codefresh.io/docs/docs/yaml-examples/examples/
+
+version: "1.0"
+# Stages can help you organize your steps in stages
+stages:
+  - "clone"
+  - "build"
+  - "push"
+  - "slim"
+
+steps:
+  clone:
+    title: "Cloning repository"
+    type: "git-clone"
+    repo: "${{gitRepoUrl}}"
+    revision: "${{gitRepoBranch}}"
+    stage: "clone"
+
+  build:
+    title: "Building Docker image"
+    stage: "build"
+    type: "build"
+    image_name: "${{imageNamespace}}/${{imageRepo}}"
+    working_directory: "${{clone}}"
+    # Set 'latest' tag on the image. Or, use built-in variables
+    # like ${{CF_BRANCH_TAG_NORMALIZED}} to use the current branch name/tag.
+    tag: "${{imageTag}}"
+    dockerfile: "Dockerfile"
+
+
+  push:
+    title: "Pushing Docker image"
+    stage: "push"
+    type: "push"
+    arguments:
+      candidate: '${{build}}'
+      tag: ${{imageTag}}
+      image_name: ${{imageNamespace}}/${{imageRepo}}
+      registry: ${{codefreshDockerRegistry}}
+
+  slim:
+    title: "Slim Docker Image"
+    stage: "slim"
+    type: "freestyle" # Run any command
+    image: "mstantoncf/slim-saas-build:latest" # The image in which command will be executed
+    working_directory: "${{clone}}" # Running command where code cloned
+    commands:
+      - "-o"
+      - ${{slimOrganizationID}}
+      - "-a"
+      - ${{slimAPIToken}}
+      - "-c"
+      - ${{slimConnectorID}}
+      - "-n"
+      - ${{imageNamespace}}
+      - "-r"
+      - ${{imageRepo}}
+      - "-t"
+      - ${{imageTag}}
+      - "-d"
+      - ${{steps.push.imageRepoDigest}}
+
+

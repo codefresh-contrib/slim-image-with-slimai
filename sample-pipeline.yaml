@@ -24,8 +24,6 @@ steps:
     type: "build"
     image_name: "${{imageNamespace}}/${{imageRepo}}"
     working_directory: "${{clone}}"
-    # Set 'latest' tag on the image. Or, use built-in variables
-    # like ${{CF_BRANCH_TAG_NORMALIZED}} to use the current branch name/tag.
     tag: "${{imageTag}}"
     dockerfile: "${{imageRepo}}/${{imageRepo}}.Dockerfile"
 
@@ -46,7 +44,7 @@ steps:
     type: "freestyle" # Run any command
     image: "mstantoncf/slim-saas-build:latest" # The image in which command will be executed
     working_directory: "${{clone}}" # Running command where code cloned
-    commands:
+    cmd:
       - "-o"
       - ${{slimOrganizationID}}
       - "-a"

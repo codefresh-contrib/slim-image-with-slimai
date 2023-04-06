@@ -47,7 +47,7 @@ steps:
     cmd:
     # These flags are the minimum required flags for the image to run  
     # There are optional flags which can be set as well.
-    # For all flags which are available, see: https://github.com/codefresh-contrib/slim-image-with-slimai#usage
+    # For all flags which are available, see: https://github.com/codefresh-contrib/slim-image-with-slimai/blob/main/README.md#usage
 
       - "-o" # Slim organization ID (See: https://github.com/codefresh-contrib/slim-image-with-slimai#slimai-organization-id)
       - ${{slimOrganizationID}}

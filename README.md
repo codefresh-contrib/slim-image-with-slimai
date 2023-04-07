@@ -11,7 +11,7 @@ This image does not require mounting any volumes or special directories as all t
   - [Standalone](#standalone)
 - [Docker image location](#docker-image-location)
 - [Usage](#usage)
-   - [Example Execuation](#example-execution)
+   - [Example Execution](#example-execution)
 - [Limitations](#limitations)
     - [Single image namespace/repo:tag](#single-image-namespacerepotag)
     - [Single connector ID](#single-connector-id)
